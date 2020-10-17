@@ -4,8 +4,6 @@
  * 11/9/19 CeC - added degreesF variable
  * 10/2020 CeC - add MQTT to send to remote HomeAssistant server
  *
- * NOTE: You will need to fill in user/passwd for your MQTT broker and the IP address
- *       or hostname of your broker, plus add the OneWire and MQTT libraries, before compiling.
  */
 
 #include <OneWire.h>

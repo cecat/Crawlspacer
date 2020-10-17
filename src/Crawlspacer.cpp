@@ -17,7 +17,7 @@
 #include <OneWire.h>
 #include <MQTT.h>
 
-// comment this out 
+// comment this out if you are not using a secrets.h file, see README
 #include "secrets.h"
 
 void setup();
