@@ -10,10 +10,15 @@
  * 11/9/19 CeC - added degreesF variable
  * 10/2020 CeC - add MQTT to send to remote HomeAssistant server
  *
+ * NOTE: You will need to fill in user/passwd for your MQTT broker and the IP address
+ *       or hostname of your broker, plus add the OneWire and MQTT libraries, before compiling.
  */
 
 #include <OneWire.h>
 #include <MQTT.h>
+
+// comment this out 
+#include "secrets.h"
 
 void setup();
 void loop();
@@ -21,7 +26,7 @@ void checkDanger();
 void tellHA (const char *ha_topic, String ha_payload);
 void initializeSensor();
 void checkTemperature();
-#line 12 "/Users/charlescatlett/CODE/Crawlspacer/src/Crawlspacer.ino"
+#line 17 "/Users/charlescatlett/CODE/Crawlspacer/src/Crawlspacer.ino"
 OneWire ds = OneWire(D4);  // 1-wire signal on pin D4
 
 /*
@@ -29,18 +34,30 @@ OneWire ds = OneWire(D4);  // 1-wire signal on pin D4
  */
 #define MQTT_KEEPALIVE 30 * 60              // 30 minutes but afaict it's ignored...
 
-// When you configure Mosquitto Broker MQTT in HA you will set a
-// username and password for MQTT - plug these in here.
+/* 
+ * When you configure Mosquitto Broker MQTT in HA you will set a
+ * username and password for MQTT - plug these in here.
+ */
+
+// uncomment and fill in the following lines (or put them into a secrets.h file and
+// leave the #include line up top): 
+/*
 const char *HA_USR = "your_HA_mqtt_username";
 const char *HA_PWD = "your_HA_mqtt_passwd";
+#define MYSERVER "my.server.com" // if using hostname
+// _OR_
+byte server[] = { x, x, x, x };  // if using IP address
+
+*/
 const char *CLIENT_NAME = "photon";
 
 // Topics - these are what you watch for as triggers in HA automations
 const char *TOPIC_A = "ha/cabin/crawlTemp";
 const char *TOPIC_B = "ha/cabin/crawlWarn";
 const char *TOPIC_C = "ha/cabin/crawlFreeze";
-const char *TOPIC_D = "ha/cabin/powerOK";
-const char *TOPIC_E = "ha/cabin/powerOUT";
+const char *TOPIC_D = "ha/cabin/crawlOK";
+const char *TOPIC_E = "ha/cabin/powerOK";
+const char *TOPIC_F = "ha/cabin/powerOUT";
 
 // MQTT functions
 void mqtt_callback(char* topic, byte* payload, unsigned int length);
@@ -54,11 +71,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
      Particle.publish("mqtt", p, 3600, PRIVATE);
  }
 
-// Define the broker (IP address of RPi running HA)
-//byte server[] = { x, x, x, x };
-//MQTT client(server, 1883, MQTT_KEEPALIVE, mqtt_callback);
-// or... define broker by name instead
-MQTT client("your.mqtt.broker.com", 1883, MQTT_KEEPALIVE, mqtt_callback);
+MQTT client(MY_SERVER, 1883, MQTT_KEEPALIVE, mqtt_callback);
 
 unsigned long lastUpdate = 0;
 float lastTemp;
@@ -68,13 +81,12 @@ byte type_s;
 byte data[12];
 byte addr[8];
 float celsius, fahrenheit;
-double degreesF;
-
-bool mqtt_success;
+double degreesF;                // used for Particle.variable 
+bool DEBUG = TRUE;
 
 // intervals (prime numbers because, why not)
-int sampleInterval  = 60601;    // check temperature every ~1 minute (60000ms)
-int publishInterval = 299993;   // report temperature every ~5 minutes (300,000ms)
+int sampleInterval  = 60601;    // 60601 check temperature every ~1 minute (60000ms)
+int publishInterval = 299993;   // 299993 report temperature every ~5 minutes (300,000ms)
 int evalInterval    = 180007;   // check for trouble every ~3 minutes (180,000ms)
 float lastPublish   = 0;
 float lastEval      = 0;
@@ -102,10 +114,11 @@ void setup() {
         Particle.publish("mqtt_status", "Failed to connect to HA - check IP address, username, passwd", 3600, PRIVATE);
     }
     
-    String temperature = String(fahrenheit); // store temp in "temperature" string
-    Particle.publish("crawlTemp", temperature, PRIVATE); // publish on startup
+    Particle.publish("crawlTemp", String(fahrenheit), PRIVATE); // publish on startup
     delay (500);
-    tellHA(TOPIC_A, String(temperature));
+    tellHA(TOPIC_A, String(fahrenheit));
+    delay (500);
+    if (fahrenheit > danger) tellHA(TOPIC_D, String(fahrenheit));
     
     Time.zone(-5);
 
@@ -116,10 +129,9 @@ void loop() {
     checkTemperature();
     degreesF = fahrenheit;
     if ( (millis()-lastPublish) > publishInterval ) {
-        String temperature = String(fahrenheit); // store temp in "temperature" string
-        Particle.publish("crawlTemp", temperature, PRIVATE); // publish to cloud
+        Particle.publish("crawlTemp", String(fahrenheit), PRIVATE); // publish to cloud
         delay(500);
-        tellHA (TOPIC_A, String(temperature));
+        tellHA (TOPIC_A, String(fahrenheit));
         lastPublish = millis();
     }
     if ( (millis()-lastEval) > evalInterval ) {
@@ -176,14 +188,17 @@ void tellHA (const char *ha_topic, String ha_payload) {
   if (client.isConnected()) {
     client.publish(ha_topic, ha_payload);
   } else {
+    if (DEBUG) Particle.publish("mqtt_status", "was NOT connected", PRIVATE);
     client.connect(CLIENT_NAME, HA_USR, HA_PWD);
     delay(500);
     client.publish(ha_topic, ha_payload);
   } // did it work?
-  if (client.isConnected()) {
+  if (DEBUG) {
+    if (client.isConnected()) {
       Particle.publish("mqtt_status", "connected", PRIVATE);
     } else {
-      Particle.publish("mqtt_status", "NOT connected", PRIVATE);
+      Particle.publish("mqtt_status", "still NOT connected", PRIVATE);
+    }
   }
 
 }
