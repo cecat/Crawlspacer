@@ -32,10 +32,10 @@ const char *HA_PWD = "your_HA_mqtt_passwd";
 ```
 
 You can take the .ino file in the src directory and paste it into the Particle.io web IDE,
-but be sure to also add in the libraries (see project.properties for the libraries. (note
-if you are reading this a long time from the last update and having trouble it could be
-that something has changed in the libraries, so you can check the version number in
-the project.properties file as well).
+make the above customizations, then add the libraries (see project.properties for
+the libraries. (note if you are reading this a long time from the last update and
+having trouble it could be that something has changed in the libraries, so you
+can check the version number in the project.properties file as well).
 
 Of course you could also use this code to monitor the temperature of other things that
 in cases where you want to know if a threshold has been reached.
