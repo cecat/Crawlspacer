@@ -8,31 +8,41 @@ and another warning if the temperature falls to 32F or below.
 It uses MQTT to send these notices and warnings to Home Assistant, where you can set
 up automations based on the topics as well as monitor temperature over time.
 
-To use this code you will need to enter the domain name or IP address of your HA system,
-which for this code we assume is running the Mosquito MQTT broker. In the code you'll
-see you can either enter the IP address of your server or the hostname. (in the code
-I'm using hostname and the line of code to specify by IP address is commented out)
+To use this code you will need to set either the hostname or IP address of your HA system,
+which for this code we assume is running the Mosquito MQTT broker.
+Also, when setting up Mosquitto MQTT you will have created an MQTT username and password -
+those will also need to be set.
+
+The best way to do this is to set up a file "secrets.h" that looks like this if you are
+using a hostname:
 
 ```
-// Define the broker (IP address of RPi running HA)
-//byte server[] = { x, x, x, x };
-//MQTT client(server, 1883, MQTT_KEEPALIVE, mqtt_callback);
-// or... define broker by name instead
-MQTT client("your.mqtt.broker.com", 1883, MQTT_KEEPALIVE, mqtt_callback);
-```
-
-When setting up Mosquitto MQTT you will have created an MQTT username and password -
-those will also need to be entered into the code:
-
-```
-// When you configure Mosquitto Broker MQTT in HA you will set a
-// username and password for MQTT - plug these in here.
 const char *HA_USR = "your_HA_mqtt_username";
 const char *HA_PWD = "your_HA_mqtt_passwd";
+#define MYSERVER "your.server.tld" 
+
+```
+
+If you are going to use the IP address of your server instead then rather than the #define
+line in secrets.h you should put the following, substituting your IP address 
+(w.x.y.z) components for w, x, y, and z:
+
+`byte server[] = { w, x, w, z };'
+
+Alternatively, you can comment out the "#include secrets.h" line and fill this information in
+following the instructions here:
+
+```
+const char *HA_USR = "your_HA_mqtt_username";
+const char *HA_PWD = "your_HA_mqtt_passwd";
+#define MYSERVER "my.server.com" // if using hostname
+// _OR_
+byte server[] = { x, x, x, x };  // if using IP address
 ```
 
 You can take the .ino file in the src directory and paste it into the Particle.io web IDE,
-make the above customizations, then add the libraries (see project.properties for
+make the above customizations (including adding a secrets.h file if you go that route),
+then add the libraries (see project.properties for
 the libraries. (note if you are reading this a long time from the last update and
 having trouble it could be that something has changed in the libraries, so you
 can check the version number in the project.properties file as well).
