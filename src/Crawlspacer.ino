@@ -1,7 +1,10 @@
-//new crawlspace monitor system for Photon
-// 7/9/19 CeC
-// 11/9/19 CeC - added degreesF variable
-// 10/2020 CeC - add MQTT to send to remote HomeAssistant server
+/* new crawlspace monitor system for Photon
+ *
+ * 7/9/19 CeC
+ * 11/9/19 CeC - added degreesF variable
+ * 10/2020 CeC - add MQTT to send to remote HomeAssistant server
+ *
+ */
 
 #include <OneWire.h>
 #include <MQTT.h>
@@ -44,7 +47,6 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 // or... define broker by name instead
 MQTT client("your.mqtt.broker.com", 1883, MQTT_KEEPALIVE, mqtt_callback);
 
-
 unsigned long lastUpdate = 0;
 float lastTemp;
 byte i;
@@ -57,10 +59,10 @@ double degreesF;
 
 bool mqtt_success;
 
-// intervals
-int sampleInterval  = 60000;    // check temperature every minute (60000ms)
-int publishInterval = 300000;   // report temperature every 5 minutes (300,000ms)
-int evalInterval    = 180000;   // check for trouble every 3 minutes (180,000ms)
+// intervals (prime numbers because, why not)
+int sampleInterval  = 60601;    // check temperature every ~1 minute (60000ms)
+int publishInterval = 299993;   // report temperature every ~5 minutes (300,000ms)
+int evalInterval    = 180007;   // check for trouble every ~3 minutes (180,000ms)
 float lastPublish   = 0;
 float lastEval      = 0;
 
@@ -83,8 +85,8 @@ void setup() {
     client.connect(CLIENT_NAME, HA_USR, HA_PWD);
     if (client.isConnected()) {
         Particle.publish("mqtt_status", "Connected to HA", 3600, PRIVATE);
-        } else {
-            Particle.publish("mqtt_status", "Failed to connect to HA - check IP address", 3600, PRIVATE);
+      } else {
+        Particle.publish("mqtt_status", "Failed to connect to HA - check IP address, username, passwd", 3600, PRIVATE);
     }
     
     String temperature = String(fahrenheit); // store temp in "temperature" string
@@ -127,26 +129,23 @@ void checkDanger() {
     if (inDanger) {
         if (fahrenheit < Freezing) {
             Particle.publish("CRAWLSPACE", "FREEZING!", PRIVATE);
-            delay(500);
-            client.publish(TOPIC_C, String(fahrenheit));
+            tellHA(TOPIC_C, String(fahrenheit));
             }
         if (fahrenheit > allGood) {
             inDanger = false;
             Particle.publish("CRAWLSPACE", "OK", PRIVATE);
-            client.publish(TOPIC_D, String(fahrenheit));
+            tellHA(TOPIC_D, String(fahrenheit));
         }
     }
     else {
         if (fahrenheit < danger) {
             inDanger = true;
             Particle.publish("CRAWLSPACE", "DANGER", PRIVATE);
-            delay(500);
-            client.publish(TOPIC_B, String(fahrenheit));
+            tellHA(TOPIC_B, String(fahrenheit));
 
             if (fahrenheit < Freezing) { 
                 Particle.publish("CRAWLSPACE", "RAPID FREEZING!", PRIVATE);
-                delay(500);
-                client.publish(TOPIC_C, String(fahrenheit));
+                tellHA(TOPIC_C, String(fahrenheit));
             }
         }
     }  
@@ -160,14 +159,19 @@ void checkDanger() {
 
 void tellHA (const char *ha_topic, String ha_payload) {
 
-  mqtt_success = client.publish(ha_topic, ha_payload);
-        if (!mqtt_success) {
-          delay(500);
-          client.connect(CLIENT_NAME, HA_USR, HA_PWD);
-          mqtt_success = client.publish(ha_topic, ha_payload);
-        }
-        if (mqtt_success) { Particle.publish("mqtt_status", "connected", PRIVATE);}
-          else { Particle.publish("mqtt_status", "NOT connected", PRIVATE);}
+  delay(500);
+  if (client.isConnected()) {
+    client.publish(ha_topic, ha_payload);
+  } else {
+    client.connect(CLIENT_NAME, HA_USR, HA_PWD);
+    delay(500);
+    client.publish(ha_topic, ha_payload);
+  } // did it work?
+  if (client.isConnected()) {
+      Particle.publish("mqtt_status", "connected", PRIVATE);
+    } else {
+      Particle.publish("mqtt_status", "NOT connected", PRIVATE);
+  }
 
 }
 
