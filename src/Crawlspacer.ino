@@ -59,8 +59,8 @@ bool mqtt_success;
 
 // intervals
 int sampleInterval  = 60000;    // check temperature every minute (60000ms)
-int publishInterval = 300000;   // report temperature every 5 minutes (900,000ms)
-int evalInterval    = 180000;   // check for trouble every 3 minutes (300,000ms)
+int publishInterval = 300000;   // report temperature every 5 minutes (300,000ms)
+int evalInterval    = 180000;   // check for trouble every 3 minutes (180,000ms)
 float lastPublish   = 0;
 float lastEval      = 0;
 
@@ -162,7 +162,7 @@ void tellHA (const char *ha_topic, String ha_payload) {
 
   mqtt_success = client.publish(ha_topic, ha_payload);
         if (!mqtt_success) {
-          delay(250);
+          delay(500);
           client.connect(CLIENT_NAME, HA_USR, HA_PWD);
           mqtt_success = client.publish(ha_topic, ha_payload);
         }
