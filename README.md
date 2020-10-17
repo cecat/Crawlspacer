@@ -20,7 +20,6 @@ using a hostname:
 const char *HA_USR = "your_HA_mqtt_username";
 const char *HA_PWD = "your_HA_mqtt_passwd";
 #define MYSERVER "your.server.tld" 
-
 ```
 
 If you are going to use the IP address of your server instead then rather than the #define
