@@ -27,7 +27,7 @@ If you are going to use the IP address of your server instead then rather than t
 line in secrets.h you should put the following, substituting your IP address 
 (w.x.y.z) components for w, x, y, and z:
 
-`byte server[] = { w, x, w, z };'
+`byte server[] = { w, x, w, z };`
 
 Alternatively, you can comment out the "#include secrets.h" line and fill this information in
 following the instructions here:
