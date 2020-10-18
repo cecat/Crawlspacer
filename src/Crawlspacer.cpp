@@ -22,7 +22,7 @@
 void setup();
 void loop();
 void checkDanger();
-void tellHA (const char *ha_topic, String ha_payload);
+void tellHASS (const char *ha_topic, String ha_payload);
 void initializeSensor();
 void checkTemperature();
 #line 16 "/Users/charlescatlett/CODE/Crawlspacer/src/Crawlspacer.ino"
@@ -113,9 +113,9 @@ void setup() {
     
     Particle.publish("crawlTemp", String(fahrenheit), PRIVATE); // publish on startup
     delay (500);
-    tellHA(TOPIC_A, String(fahrenheit));
+    tellHASS(TOPIC_A, String(fahrenheit));
     delay (500);
-    if (fahrenheit > danger) tellHA(TOPIC_D, String(fahrenheit));
+    if (fahrenheit > danger) tellHASS(TOPIC_D, String(fahrenheit));
     
     Time.zone(-5);
 
@@ -128,7 +128,7 @@ void loop() {
     if ( (millis()-lastPublish) > publishInterval ) {
         Particle.publish("crawlTemp", String(fahrenheit), PRIVATE); // publish to cloud
         delay(500);
-        tellHA (TOPIC_A, String(fahrenheit));
+        tellHASS (TOPIC_A, String(fahrenheit));
         lastPublish = millis();
     }
     if ( (millis()-lastEval) > evalInterval ) {
@@ -151,23 +151,23 @@ void checkDanger() {
     if (inDanger) {
         if (fahrenheit < Freezing) {
             Particle.publish("CRAWLSPACE", "FREEZING!", PRIVATE);
-            tellHA(TOPIC_C, String(fahrenheit));
+            tellHASS(TOPIC_C, String(fahrenheit));
             }
         if (fahrenheit > allGood) {
             inDanger = false;
             Particle.publish("CRAWLSPACE", "OK", PRIVATE);
-            tellHA(TOPIC_D, String(fahrenheit));
+            tellHASS(TOPIC_D, String(fahrenheit));
         }
     }
     else {
         if (fahrenheit < danger) {
             inDanger = true;
             Particle.publish("CRAWLSPACE", "DANGER", PRIVATE);
-            tellHA(TOPIC_B, String(fahrenheit));
+            tellHASS(TOPIC_B, String(fahrenheit));
 
             if (fahrenheit < Freezing) { 
                 Particle.publish("CRAWLSPACE", "RAPID FREEZING!", PRIVATE);
-                tellHA(TOPIC_C, String(fahrenheit));
+                tellHASS(TOPIC_C, String(fahrenheit));
             }
         }
     }  
@@ -179,7 +179,7 @@ void checkDanger() {
 // due to oddly short connection timeouts (ignoring MQTT_KEEPALIVE afaict)
 // require recovery code
 
-void tellHA (const char *ha_topic, String ha_payload) {
+void tellHASS (const char *ha_topic, String ha_payload) {
 
   delay(500);
   if (client.isConnected()) {
