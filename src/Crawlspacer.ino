@@ -9,7 +9,8 @@
 #include <OneWire.h>
 #include <MQTT.h>
 
-// comment this out 
+// comment this out if not using a secrets.h file for your username, password, and servername
+// or IP address 
 #include "secrets.h"
 
 OneWire ds = OneWire(D4);  // 1-wire signal on pin D4
@@ -21,19 +22,17 @@ OneWire ds = OneWire(D4);  // 1-wire signal on pin D4
 
 /* 
  * When you configure Mosquitto Broker MQTT in HA you will set a
- * username and password for MQTT - plug these in here.
+ * username and password for MQTT - plug these in here if you are not
+ * using a secrets.h file.
  */
+//const char *HA_USR = "your_ha_mqtt_usrname";
+//const char *HA_PWD = "your_ha_mqtt_passwd";
+//uncomment this line and fill in w.x.y.z if you are going by IP address,:
+//  byte MY_SERVER[] = { 73, 246, 85, 17 };
+// OR this one if you are doing hostname (filling in yours)
+//  #define MY_SERVER "your.mqtt.broker.tld"
 
-// uncomment and fill in the following lines (or put them into a secrets.h file and
-// leave the #include line up top): 
-/*
-const char *HA_USR = "your_HA_mqtt_username";
-const char *HA_PWD = "your_HA_mqtt_passwd";
-#define MYSERVER "my.server.com" // if using hostname
-// _OR_
-byte server[] = { x, x, x, x };  // if using IP address
 
-*/
 const char *CLIENT_NAME = "photon";
 
 // Topics - these are what you watch for as triggers in HA automations
@@ -67,7 +66,7 @@ byte data[12];
 byte addr[8];
 float celsius, fahrenheit;
 double degreesF;                // used for Particle.variable 
-bool DEBUG = TRUE;
+bool DEBUG = FALSE;
 
 // intervals (prime numbers because, why not)
 int sampleInterval  = 60601;    // 60601 check temperature every ~1 minute (60000ms)

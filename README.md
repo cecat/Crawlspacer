@@ -17,30 +17,19 @@ The best way to do this is to set up a file "secrets.h" that looks like this if 
 using a hostname:
 
 ```
-const char *HA_USR = "your_HA_mqtt_username";
-const char *HA_PWD = "your_HA_mqtt_passwd";
-#define MYSERVER "your.server.tld" 
+const char *HA_USR = "your mqtt username";
+const char *HA_PWD = "your mqtt passwd";
+// and use one of the following two lines:
+//#define MY_SERVER  "your.server.hostname"
+// or using your IP address w.x.y.z
+byte MY_SERVER[] = { w, x, y, z };
 ```
-
-If you are going to use the IP address of your server instead then rather than the #define
-line in secrets.h you should put the following, substituting your IP address 
-(w.x.y.z) components for w, x, y, and z:
-
-`byte server[] = { w, x, w, z };`
 
 Alternatively, you can comment out the "#include secrets.h" line and fill this information in
-following the instructions here:
+following the instructions in the code.
 
-```
-const char *HA_USR = "your_HA_mqtt_username";
-const char *HA_PWD = "your_HA_mqtt_passwd";
-#define MYSERVER "my.server.com" // if using hostname
-// _OR_
-byte server[] = { x, x, x, x };  // if using IP address
-```
-
-You can take the .ino file in the src directory and paste it into the Particle.io web IDE,
-make the above customizations (including adding a secrets.h file if you go that route),
+You can take the .ino file from the src directory and paste it into the Particle.io web IDE,
+make the above customizations (adding a secrets.h file if you go that route),
 then add the libraries (see project.properties for
 the libraries. (note if you are reading this a long time from the last update and
 having trouble it could be that something has changed in the libraries, so you
