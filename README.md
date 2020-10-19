@@ -7,9 +7,9 @@ and another warning if the temperature falls to 32F or below.
 
 It uses MQTT to send these notices and warnings to Home Assistant, where you can set
 up automations based on the topics as well as monitor temperature over time.
-This code uses MQTT with QoS=0 (i.e., none, but this still seems reliable with Wifi-Internet
+This code uses MQTT with QoS=0 (i.e., none) But this still seems reliable with Wifi-Internet
 to a remote HA server.  If using a cellular connected Particle Electron the message
-loss risk goes up, particularly if you have weak cellular coverage).)
+loss risk goes up, particularly if you have weak cellular coverage.
 
 To use this code you will need to set either the hostname or IP address of your HA system,
 which for this code we assume is running the Mosquito MQTT broker.
