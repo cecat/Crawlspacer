@@ -1,6 +1,8 @@
 # Crawlspacer
 Monitor crawlspace temp and other things at a remote home (avoid pipes freezing, etc.)
 
+NOTE: There is an expanded version of this, adding power monitoring: [Lake-Watch](https://github.com/cecat/Lake-Watch)
+
 This code sends a temperature reading every 5 minutes.  There are values set in the code
 to monitor a crawlspace to raise a warning if the temperature is falling toward 32F
 and another warning if the temperature falls to 32F or below. 
