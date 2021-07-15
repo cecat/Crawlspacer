@@ -3,6 +3,8 @@
  * 7/9/19 CeC
  * 11/9/19 CeC - added degreesF variable
  * 10/2020 CeC - add MQTT to send to remote HomeAssistant server
+ * 
+ * This code has been deprecated in favor of  LakeWatch (https://github.com/cecat/Lake-Watch)
  *
  */
 
